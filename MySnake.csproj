@@ -9,6 +9,23 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="bin\**" />
+    <EmbeddedResource Remove="bin\**" />
+    <None Remove="bin\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="bin\Release\net6.0-windows\publish\MySnake.deps.json" />
+    <Content Include="bin\Release\net6.0-windows\publish\MySnake.runtimeconfig.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="bin\Release\net6.0-windows\publish\MySnake.dll" />
+    <None Include="bin\Release\net6.0-windows\publish\MySnake.exe" />
+    <None Include="bin\Release\net6.0-windows\publish\MySnake.pdb" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Compile Update="Properties\Resources.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>

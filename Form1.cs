@@ -203,7 +203,7 @@ namespace MySnake
                                              Settings.pixelWidth, Settings.pixelHeight
                                              ));
 
-                    if ((Settings.Total % 3) == 0 && (Settings.Total>0))
+                    if ((Settings.Total % 10) == 0 && (Settings.Total>0))
                     {
                         gameWindow.FillEllipse(Brushes.Gold,
                                         new Rectangle(
