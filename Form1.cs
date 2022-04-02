@@ -15,9 +15,7 @@ namespace MySnake
    
     public partial class Form1 : Form
     {
-        public int maxXpos = 0;
-        public int maxYpos = 0;
-        bool specialApple = false;
+        Random random = new Random();
         private List<Item> Tale = new List<Item>();
         private Item Apple = new Item();
         System.Windows.Forms.Timer timer = new System.Windows.Forms.Timer();
@@ -25,13 +23,13 @@ namespace MySnake
         public Form1()
         {
             InitializeComponent();
+           
             new Settings();
-            timer.Interval = 1000/Settings.snakeSpeed; 
-            timer.Tick += updateScreen; 
+            timer.Interval = 150;
+            timer.Tick += readInput;
             timer.Start();
-            maxXpos = gameWindow.Size.Width / Settings.pixelWidth;
-            maxYpos = gameWindow.Size.Height / Settings.pixelHeight;
-
+            
+            this.Text = ("Welcome "+ Environment.UserName+ ". Thanks for playing ;)");
             startGame();
         }
         private void keyisdown(object sender, KeyEventArgs e)
@@ -46,9 +44,13 @@ namespace MySnake
 
         private void startGame()
         {
+            new Settings();
             gameOwer.Visible = false;
             Total.Visible = true;
-            new Settings();
+
+            Settings.maxXpos = gameWindow.Size.Width / Settings.pixelWidth;
+            Settings.maxYpos = gameWindow.Size.Height / Settings.pixelHeight;
+            
             Tale.Clear();
             Item head = new Item { x = 10, y = 10 };
             Tale.Add(head);
@@ -56,7 +58,83 @@ namespace MySnake
             newApple();
         }
 
-        private void moveSnake()
+        private void readInput(object sender, EventArgs e)
+        {
+            if (Input.Keyboard(Keys.Escape))
+            {
+                Close();
+            }
+            if (Settings.gameOver == true)
+            {
+                string gameOver = "Game Over\n" + "Total is: " + Settings.Total + "\nEnter to Restart";
+                gameOwer.Text = gameOver;
+                gameOwer.Visible = true;
+                Total.Visible = false;
+
+                if (Input.Keyboard(Keys.Enter))
+                {
+                    startGame();
+                }
+            }
+            else
+            {
+                if (Input.Keyboard(Keys.Right) && Settings.Direction != Directions.L)
+                {
+                    Settings.Direction = Directions.R;
+                }
+                else if (Input.Keyboard(Keys.Left) && Settings.Direction != Directions.R)
+                {
+                    Settings.Direction = Directions.L;
+                }
+                else if (Input.Keyboard(Keys.Up) && Settings.Direction != Directions.D)
+                {
+                    Settings.Direction = Directions.U;
+                }
+                else if (Input.Keyboard(Keys.Down) && Settings.Direction != Directions.U)
+                {
+                    Settings.Direction = Directions.D;
+                }
+                moveSnake(Tale, Apple);
+            }
+            gameWindow.Invalidate();
+        }
+
+        public void newApple()
+        {
+            int x = random.Next(0, Settings.maxXpos);
+            int y = random.Next(0, Settings.maxYpos);
+
+            Apple = new Item(x, y);
+
+            for (int i = Tale.Count - 1; i >= 0; i--)
+            {
+                if (Tale[i].x == Apple.x && Tale[i].y == Apple.y)
+                {
+                    Apple = new Item { x = random.Next(0, Settings.maxXpos), y = random.Next(0, Settings.maxYpos) };
+                }
+            }
+        }
+
+        public void eat()
+        {
+            Item body = new Item
+            {
+                x = Tale[Tale.Count - 1].x,
+                y = Tale[Tale.Count - 1].y
+            };
+
+            Tale.Add(body);
+            Settings.Total += Settings.Point;
+            if (Settings.specialApple)
+            {
+                Settings.Total += Settings.Point;
+                Settings.specialApple = false;
+            }
+            Total.Text = "Total: " + Settings.Total.ToString();
+            newApple();
+        }
+
+        public void moveSnake(List<Item> Tale, Item Apple)
         {
             for (int i = Tale.Count - 1; i >= 0; i--)
             {
@@ -78,7 +156,7 @@ namespace MySnake
                             break;
                     }
 
-                    if (Tale[i].x < 0 || Tale[i].y < 0 || Tale[i].x > maxXpos-1 || Tale[i].y > maxYpos-1)
+                    if (Tale[i].x < 0 || Tale[i].y < 0 || Tale[i].x > Settings.maxXpos - 1 || Tale[i].y > Settings.maxYpos - 1)
                     {
                         collision();
                     }
@@ -104,79 +182,11 @@ namespace MySnake
             }
         }
 
-        private void newApple()
+        private void collision()
         {
-            Random random = new Random();
-            Apple = new Item { x = random.Next(0, maxXpos), y = random.Next(0, maxYpos) };
-
-            for (int i = Tale.Count - 1; i >= 0; i--) 
-            {
-                if (Tale[i].x == Apple.x && Tale[i].y == Apple.y)
-                {
-                    Apple = new Item { x = random.Next(0, maxXpos), y = random.Next(0, maxYpos) };
-                }
-            }
+            Settings.gameOver = true;
         }
 
-        private void eat()
-        {
-            Item body = new Item
-            {
-                x = Tale[Tale.Count - 1].x,
-                y = Tale[Tale.Count - 1].y
-            };
-
-            Tale.Add(body);
-            Settings.Total += Settings.Point;
-            if (specialApple)
-            {
-                Settings.Total += Settings.Point;
-                specialApple = false;
-            }
-            Total.Text = "Total: "+ Settings.Total.ToString();
-            newApple();
-        }
-     
-        private void updateScreen(object sender, EventArgs e)
-        {
-            if(Input.Keyboard(Keys.Escape))
-            {
-                Close();
-            }
-            if(Settings.gameOver == true)
-            {
-                string gameOver = "Game Over\n" + "Total is: " + Settings.Total + "\nEnter to Restart";
-                gameOwer.Text = gameOver;
-                gameOwer.Visible = true;
-                Total.Visible = false;
-                
-                if (Input.Keyboard(Keys.Enter))
-                {
-                    startGame();
-                }
-            }
-            else
-            {
-                if (Input.Keyboard(Keys.Right) && Settings.Direction != Directions.L)
-                {
-                    Settings.Direction = Directions.R;
-                }
-                else if (Input.Keyboard(Keys.Left) && Settings.Direction != Directions.R)
-                {
-                    Settings.Direction = Directions.L;
-                }
-                else if (Input.Keyboard(Keys.Up) && Settings.Direction != Directions.D)
-                {
-                    Settings.Direction = Directions.U;
-                }
-                else if (Input.Keyboard(Keys.Down) && Settings.Direction != Directions.U)
-                {
-                    Settings.Direction = Directions.D;
-                }
-                moveSnake();
-            }
-            gameWindow.Invalidate();
-        }
 
         private void paintGraphics(object sender, PaintEventArgs e)
         {
@@ -211,7 +221,7 @@ namespace MySnake
                                             Apple.y * Settings.pixelHeight,
                                             Settings.pixelWidth, Settings.pixelHeight
                                             ));
-                        specialApple = true;
+                        Settings.specialApple = true;
                     }
                     else 
                     {
@@ -226,9 +236,6 @@ namespace MySnake
             }
         }
 
-        private void collision()
-        {
-            Settings.gameOver = true;
-        }
+
     }
 }
